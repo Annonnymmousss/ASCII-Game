@@ -7,8 +7,8 @@ from typing import Iterable, Tuple, Optional
 import cv2
 import numpy as np
 
-
-CHAR_ASPECT = 2.0  # aspect correction factor for characters
+# Character aspect ratio correction
+CHAR_ASPECT = 2.0  
 
 
 def get_terminal_size() -> tuple[int, int]:
@@ -22,18 +22,47 @@ def _normalize_frame(gray: np.ndarray, invert: bool) -> np.ndarray:
     return 255 - gray if invert else gray
 
 
-def _boost_colors(rgb: np.ndarray, factor: float = 1.8) -> np.ndarray:
+def _enhance_colors(rgb: np.ndarray, contrast: float = 1.4, saturation: float = 1.5, brightness: float = 1.15) -> np.ndarray:
     """
-    Boost saturation and contrast of RGB image to make colors pop.
+    Enhance contrast, saturation, and brightness while preserving blacks & whites.
     """
-    # Convert to float for scaling
     rgb = rgb.astype(np.float32)
 
-    # Center around 128, scale, and clamp
-    rgb = (rgb - 128) * factor + 128
+    # Contrast (centered at 128 to keep black/white intact)
+    rgb = 128 + (rgb - 128) * contrast
     rgb = np.clip(rgb, 0, 255)
 
-    return rgb.astype(np.uint8)
+    # Brightness scaling
+    rgb *= brightness
+    rgb = np.clip(rgb, 0, 255)
+
+    # Convert to HSV for saturation control
+    hsv = cv2.cvtColor(rgb.astype(np.uint8), cv2.COLOR_RGB2HSV).astype(np.float32)
+    hsv[..., 1] *= saturation  # Boost saturation
+    hsv[..., 1] = np.clip(hsv[..., 1], 0, 255)
+
+    enhanced = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2RGB)
+    return enhanced
+
+
+def _get_colored_char(r: int, g: int, b: int, ch: str) -> str:
+    """
+    Return ANSI-colored character with accurate black/white handling and vivid colors.
+    """
+    # True black stays black
+    if r == 0 and g == 0 and b == 0:
+        return f"\x1b[38;2;0;0;0m{ch}\x1b[0m"
+
+    # Near-black shades (don’t brighten too much)
+    if max(r, g, b) < 20:
+        return f"\x1b[38;2;{r};{g};{b}m{ch}\x1b[0m"
+
+    # Near-white shades (don’t oversaturate)
+    if min(r, g, b) > 235:
+        return f"\x1b[38;2;255;255;255m{ch}\x1b[0m"
+
+    # Normal colors (boosted vividness already applied in _enhance_colors)
+    return f"\x1b[38;2;{r};{g};{b}m{ch}\x1b[0m"
 
 
 def image_to_ascii(
@@ -46,13 +75,14 @@ def image_to_ascii(
 ) -> str:
     """
     Convert a BGR image (numpy array) to an ASCII multi-line string.
-    Now with EXTREME color shading and true black chars.
+    Preserves blacks/whites + boosts colors for vivid output.
     """
     if img_bgr is None or img_bgr.size == 0:
         raise ValueError("Empty image provided")
 
     h, w = img_bgr.shape[:2]
 
+    # Maintain correct aspect ratio
     if target_height is None:
         aspect = h / w
         target_height = max(1, int(aspect * target_width / CHAR_ASPECT))
@@ -62,6 +92,7 @@ def image_to_ascii(
     gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
     gray = _normalize_frame(gray, invert)
 
+    # Map grayscale to charset
     chars = np.asarray(list(charset))
     bins = np.linspace(0, 256, num=len(chars) + 1, dtype=np.float32)
     idx = np.digitize(gray.astype(np.float32), bins) - 1
@@ -70,9 +101,9 @@ def image_to_ascii(
     if not color:
         return "\n".join("".join(chars[row]) for row in idx)
 
-    # EXTREME COLORS
+    # Color mode: Enhance for vivid effect
     rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
-    rgb = _boost_colors(rgb, factor=2.2)  # crank saturation
+    rgb = _enhance_colors(rgb, contrast=1.4, saturation=1.5, brightness=1.15)
 
     out_lines = []
     for y in range(idx.shape[0]):
@@ -80,18 +111,7 @@ def image_to_ascii(
         for x in range(idx.shape[1]):
             r, g, b = rgb[y, x]
             ch = chars[idx[y, x]]
-
-            # Extreme black detection
-            if r < 40 and g < 40 and b < 40:
-                row_chars.append(f"\x1b[38;2;0;0;0m{ch}\x1b[0m")
-                continue
-
-            # Amplify brightness for more vividness
-            r = min(255, int(r * 1.5))
-            g = min(255, int(g * 1.5))
-            b = min(255, int(b * 1.5))
-
-            row_chars.append(f"\x1b[38;2;{r};{g};{b}m{ch}\x1b[0m")
+            row_chars.append(_get_colored_char(r, g, b, ch))
         out_lines.append("".join(row_chars))
     return "\n".join(out_lines)
 
@@ -147,7 +167,7 @@ def play_video_in_terminal(
     clear_each: bool = True,
     max_frame_skip: int = 5,
 ):
-    """Play a video as ASCII directly in the terminal with extreme colors."""
+    """Play a video as ASCII directly in the terminal with vivid & precise colors."""
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         raise RuntimeError(f"Failed to open video: {video_path}")
