@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  ascii-server:
+    build: .
+    container_name: ascii-media
+    ports:
+      - "5050:5000"
+    volumes:
+      - .:/app
+      - ./uploads:/app/uploads  
+    environment:
+      - FLASK_ENV=development
