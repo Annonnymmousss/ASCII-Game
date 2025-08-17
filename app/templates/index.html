@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>ASCII Image/Video Uploader</h1>
+<p class="muted">Uploads are stored under <code>instance/uploads</code>. Outputs under <code>instance/outputs</code>.</p>
+
+<div class="grid section">
+  <section>
+    <h2>Image → ASCII</h2>
+    <form action="/api/upload/image" method="post" enctype="multipart/form-data">
+      <label>Choose image</label>
+      <input type="file" name="file" accept="image/*" required />
+
+      <label class="section">Target width (columns)</label>
+      <input type="number" name="width" value="{{ default_width }}" min="20" max="400" />
+
+      <label class="section">Charset (dense → sparse)</label>
+      <input type="text" name="charset" value="{{ default_charset }}" />
+
+      <div class="row section">
+        <label><input type="checkbox" name="invert" value="true" /> Invert</label>
+        <label><input type="checkbox" name="color" value="true" /> Color</label>
+        <label><input type="checkbox" name="terminal" value="true" /> Print to terminal after save</label>
+      </div>
+
+      <div class="section"><button class="btn" type="submit">Convert Image</button></div>
+    </form>
+  </section>
+
+  <section>
+    <h2>Video → ASCII (plays in server terminal)</h2>
+    <form action="/api/upload/video" method="post" enctype="multipart/form-data">
+      <label>Choose video</label>
+      <input type="file" name="file" accept="video/*" required />
+
+      <label class="section">Target width (columns)</label>
+      <input type="number" name="width" value="{{ default_width }}" min="20" max="240" />
+
+      <label class="section">Charset (dense → sparse)</label>
+      <input type="text" name="charset" value="{{ default_charset }}" />
+
+      <div class="row section">
+        <label><input type="checkbox" name="invert" value="true" /> Invert</label>
+        <label><input type="checkbox" name="color" value="true" /> Color</label>
+        <label><input type="checkbox" name="terminal" value="true" checked /> Play in terminal</label>
+      </div>
+
+      <div class="section"><button class="btn" type="submit">Convert & Play</button></div>
+    </form>
+  </section>
+</div>
+
+<form action="/api/control/stop" method="post" class="section">
+  <button class="btn" type="submit">Stop Terminal Playback</button>
+</form>
+{% endblock %}

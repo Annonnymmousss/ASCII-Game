@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Success ({{ kind }})</h2>
+<p>Uploaded to: <code>{{ upload_path }}</code></p>
+<p>Output saved: <code>{{ output_path }}</code></p>
+<p class="muted">For videos, if you enabled terminal playback, it should be running in the server console now.</p>
+<p><a href="/">⬅ Back</a></p>
+{% endblock %}
