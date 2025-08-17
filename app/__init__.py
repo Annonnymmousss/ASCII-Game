@@ -17,12 +17,10 @@ def create_app():
         DEFAULT_COLOR=False,
     )
 
-    # Ensure instance folders exist
     os.makedirs(app.instance_path, exist_ok=True)
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
 
-    # Register blueprints
     from .blueprints.main import bp as main_bp
     from .blueprints.api import bp as api_bp
 
