@@ -1,8 +1,65 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Success ({{ kind }})</h2>
-<p>Uploaded to: <code>{{ upload_path }}</code></p>
-<p>Output saved: <code>{{ output_path }}</code></p>
-<p class="muted">For videos, if you enabled terminal playback, it should be running in the server console now.</p>
-<p><a href="/">⬅ Back</a></p>
+
+<div class="ascii-header">
+███████╗██╗   ██╗ ██████╗ ██████╗███████╗███████╗███████╗
+██╔════╝██║   ██║██╔════╝██╔════╝██╔════╝██╔════╝██╔════╝
+███████╗██║   ██║██║     ██║     █████╗  ███████╗███████╗
+╚════██║██║   ██║██║     ██║     ██╔══╝  ╚════██║╚════██║
+███████║╚██████╔╝╚██████╗╚██████╗███████╗███████║███████║
+╚══════╝ ╚═════╝  ╚═════╝ ╚═════╝╚══════╝╚══════╝╚══════╝
+</div>
+
+<h1>Conversion Complete!</h1>
+
+<div style="text-align: center; margin: 2rem 0;">
+  <div style="display: inline-block; padding: 2rem; background: rgba(0, 255, 136, 0.1); border-radius: 15px; border: 1px solid rgba(0, 255, 136, 0.2); margin-bottom: 2rem;">
+    <h2 style="color: var(--accent-green); margin-bottom: 1rem; font-size: 1.5rem;">✓ Processing Results</h2>
+    
+    <div style="text-align: left; max-width: 500px;">
+      <div style="margin-bottom: 1rem;">
+        <strong style="color: var(--accent-cyan);">Content Type:</strong>
+        <span style="color: var(--text-primary); margin-left: 0.5rem; text-transform: capitalize;">{{ kind }}</span>
+      </div>
+      
+      <div style="margin-bottom: 1rem;">
+        <strong style="color: var(--accent-cyan);">Uploaded to:</strong>
+        <code style="margin-left: 0.5rem;">{{ upload_path }}</code>
+      </div>
+      
+      <div style="margin-bottom: 1rem;">
+        <strong style="color: var(--accent-cyan);">Output saved:</strong>
+        <code style="margin-left: 0.5rem;">{{ output_path }}</code>
+      </div>
+    </div>
+  </div>
+
+  {% if kind == 'video' %}
+  <div class="muted" style="max-width: 600px; margin: 0 auto 2rem;">
+    <strong>Video Playback:</strong> If you enabled terminal playback, the ASCII video should now be running in the server console. 
+    Use the stop button on the main page to halt playback if needed.
+  </div>
+  {% endif %}
+
+  <a href="/" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: rgba(255, 255, 255, 0.05); border-radius: 10px; text-decoration: none; border: 1px solid var(--border); transition: all 0.3s ease;">
+    <span style="font-size: 1.2rem;">←</span>
+    <span>Back to Converter</span>
+  </a>
+</div>
+
+<script>
+  // Add a subtle success animation
+  document.addEventListener('DOMContentLoaded', function() {
+    const card = document.querySelector('.card');
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+      card.style.transition = 'all 0.8s ease';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, 100);
+  });
+</script>
+
 {% endblock %}

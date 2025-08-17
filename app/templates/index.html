@@ -1,55 +1,76 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>ASCII Image/Video Uploader</h1>
-<p class="muted">Uploads are stored under <code>instance/uploads</code>. Outputs under <code>instance/outputs</code>.</p>
 
-<div class="grid section">
+<div class="ascii-header">
+██████╗ ███████╗██╗██╗    
+██╔══██╗██╔════╝██║██║    
+██████╔╝███████╗██║██║    
+██╔══██╗╚════██║██║██║    
+██║  ██║███████║██║██║    
+╚═╝  ╚═╝╚══════╝╚═╝╚═╝    
+</div>
+
+<h1>ASCII Media Converter</h1>
+<p class="muted">
+  <strong>Storage Info:</strong> Uploads → <code>instance/uploads</code> | Outputs → <code>instance/outputs</code>
+</p>
+
+<div class="grid">
   <section>
     <h2>Image → ASCII</h2>
     <form action="/api/upload/image" method="post" enctype="multipart/form-data">
-      <label>Choose image</label>
+      <label>Choose Image File</label>
       <input type="file" name="file" accept="image/*" required />
 
-      <label class="section">Target width (columns)</label>
+      <label class="section">Target Width (columns)</label>
       <input type="number" name="width" value="{{ default_width }}" min="20" max="400" />
 
-      <label class="section">Charset (dense → sparse)</label>
-      <input type="text" name="charset" value="{{ default_charset }}" />
+      <label class="section">Character Set (dense → sparse)</label>
+      <input type="text" name="charset" value="{{ default_charset }}" placeholder="@%#*+=-:. " />
 
       <div class="row section">
-        <label><input type="checkbox" name="invert" value="true" /> Invert</label>
-        <label><input type="checkbox" name="color" value="true" /> Color</label>
-        <label><input type="checkbox" name="terminal" value="true" /> Print to terminal after save</label>
+        <label><input type="checkbox" name="invert" value="true" /> Invert Colors</label>
+        <label><input type="checkbox" name="color" value="true" /> Color Mode</label>
+        <label><input type="checkbox" name="terminal" value="true" /> Print to Terminal</label>
       </div>
 
-      <div class="section"><button class="btn" type="submit">Convert Image</button></div>
+      <div class="section">
+        <button class="btn" type="submit">Convert Image</button>
+      </div>
     </form>
   </section>
 
   <section>
-    <h2>Video → ASCII (plays in server terminal)</h2>
+    <h2>Video → ASCII</h2>
     <form action="/api/upload/video" method="post" enctype="multipart/form-data">
-      <label>Choose video</label>
+      <label>Choose Video File</label>
       <input type="file" name="file" accept="video/*" required />
 
-      <label class="section">Target width (columns)</label>
+      <label class="section">Target Width (columns)</label>
       <input type="number" name="width" value="{{ default_width }}" min="20" max="240" />
 
-      <label class="section">Charset (dense → sparse)</label>
-      <input type="text" name="charset" value="{{ default_charset }}" />
+      <label class="section">Character Set (dense → sparse)</label>
+      <input type="text" name="charset" value="{{ default_charset }}" placeholder="@%#*+=-:. " />
 
       <div class="row section">
-        <label><input type="checkbox" name="invert" value="true" /> Invert</label>
-        <label><input type="checkbox" name="color" value="true" /> Color</label>
-        <label><input type="checkbox" name="terminal" value="true" checked /> Play in terminal</label>
+        <label><input type="checkbox" name="invert" value="true" /> Invert Colors</label>
+        <label><input type="checkbox" name="color" value="true" /> Color Mode</label>
+        <label><input type="checkbox" name="terminal" value="true" checked /> Play in Terminal</label>
       </div>
 
-      <div class="section"><button class="btn" type="submit">Convert & Play</button></div>
+      <div class="section">
+        <button class="btn" type="submit">Convert & Play</button>
+      </div>
     </form>
   </section>
 </div>
 
 <form action="/api/control/stop" method="post" class="section">
-  <button class="btn" type="submit">Stop Terminal Playback</button>
+  <div style="text-align: center; padding: 2rem; background: rgba(255, 68, 68, 0.1); border-radius: 15px; border: 1px solid rgba(255, 68, 68, 0.2);">
+    <h2 style="color: #ff6b6b; margin-bottom: 1rem;">Terminal Control</h2>
+    <p class="muted" style="background: none; border: none; padding: 0; margin-bottom: 1rem;">Stop any currently running ASCII video playback in the server terminal.</p>
+    <button class="btn" type="submit" style="background: linear-gradient(45deg, #ff4444, #ff6666);">Stop Terminal Playback</button>
+  </div>
 </form>
+
 {% endblock %}
